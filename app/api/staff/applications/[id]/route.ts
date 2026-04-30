@@ -4,16 +4,20 @@ import { authOptions } from "@/lib/auth";
 import { dbConnect } from "@/lib/db";
 import Application from "@/models/Application";
 
-// 1. Notice the 'NextRequest' type and the 'Promise' for params
+/**
+ * PATCH handler for updating student applications.
+ * Next.js 16 requires 'params' to be treated as a Promise.
+ */
 export async function PATCH(
   req: NextRequest, 
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session: any = await getServerSession(authOptions);
-  
-  // 2. You MUST await params before destructuring 'id'
+  // 1. Await the params to extract the ID (Required for Next.js 16)
   const { id } = await params;
 
+  // 2. Check authentication and staff role
+  const session: any = await getServerSession(authOptions);
+  
   if (!session?.user || (session.user as any).role !== "staff") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
@@ -21,13 +25,16 @@ export async function PATCH(
   try {
     const { status } = await req.json();
     
-    if (!["accepted", "declined", "completed", "pending"].includes(status)) {
+    // 3. Validate the status update
+    const validStatuses = ["accepted", "declined", "completed", "pending"];
+    if (!validStatuses.includes(status)) {
       return NextResponse.json({ error: "Invalid status" }, { status: 400 });
     }
 
     await dbConnect();
 
-    // 3. Use the awaited 'id' in your Mongoose query
+    // 4. Update the application in MongoDB
+    // Using 'any' casting to bypass Mongoose model initialization issues
     const updated = await (Application as any).findByIdAndUpdate(
       id, 
       { status }, 
@@ -35,11 +42,12 @@ export async function PATCH(
     );
 
     if (!updated) {
-      return NextResponse.json({ error: "Not found" }, { status: 404 });
+      return NextResponse.json({ error: "Application not found" }, { status: 404 });
     }
     
     return NextResponse.json({ ok: true });
   } catch (error) {
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+    console.error("Update error:", error);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }
