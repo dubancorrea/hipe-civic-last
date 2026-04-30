@@ -3,7 +3,8 @@ const nextConfig = {
   // 1. Deployment optimization
   output: 'standalone',
 
-  // 2. Database bundling (Next.js 14/15 standard)
+  // 2. Database bundling
+  // Ensures Mongoose and MongoDB work correctly in the Vercel build environment
   serverExternalPackages: ['mongodb', 'mongoose'],
 
   // 3. Image optimization
@@ -11,7 +12,13 @@ const nextConfig = {
     unoptimized: true,
   },
 
-  // 4. API Headers & CORS
+  // 4. Addressing the Middleware-to-Proxy warning
+  // Next.js 16 prefers defining routing and proxying here
+  experimental: {
+    proxy: true,
+  },
+
+  // 5. API Headers & CORS
   async headers() {
     return [
       {
