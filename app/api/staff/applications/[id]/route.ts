@@ -4,17 +4,16 @@ import { authOptions } from "@/lib/auth";
 import { dbConnect } from "@/lib/db";
 import Application from "@/models/Application";
 
-// 1. Update the context type: params is now a Promise
+// Update: Ensure the first argument is 'NextRequest' and 'params' is a Promise
 export async function PATCH(
   req: NextRequest, 
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session: any = await getServerSession(authOptions);
   
-  // 2. Await the params to extract the application ID
+  // Update: Await the params before using the 'id'
   const { id } = await params;
 
-  // 3. Verify user is authenticated and has the "staff" role
   if (!session?.user || (session.user as any).role !== "staff") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
@@ -22,14 +21,13 @@ export async function PATCH(
   try {
     const { status } = await req.json();
     
-    // 4. Validate the status update
     if (!["accepted", "declined", "completed", "pending"].includes(status)) {
       return NextResponse.json({ error: "Invalid status" }, { status: 400 });
     }
 
     await dbConnect();
 
-    // 5. Use the awaited 'id' in your database query
+    // Use the awaited 'id' here
     const updated = await (Application as any).findByIdAndUpdate(
       id, 
       { status }, 
