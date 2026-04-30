@@ -1,27 +1,17 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // 1. Ensures the app can be deployed or containerized easily
+  // 1. Deployment optimization
   output: 'standalone',
 
-  // 2. Fixes the Mongoose/MongoDB bundling errors
-  // In Next.js 15+, this moved from 'experimental' to the top level
+  // 2. Database bundling (Next.js 14/15 standard)
   serverExternalPackages: ['mongodb', 'mongoose'],
 
-  // 3. Image optimization settings
+  // 3. Image optimization
   images: {
     unoptimized: true,
   },
 
-  // 4. Turbopack & Workspace Root Fix
-  // This explicitly tells Next.js where your project starts 
-  // to stop it from looking at your Downloads folder.
-  experimental: {
-    turbopack: {
-      root: '.',
-    },
-  },
-
-  // 5. API Headers & CORS
+  // 4. API Headers & CORS
   async headers() {
     return [
       {

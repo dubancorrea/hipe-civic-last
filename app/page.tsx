@@ -4,22 +4,26 @@ import { Heart, Globe, Megaphone, ArrowUpRight, Volume2 } from "lucide-react";
 
 export default function Home() {
   return (
-    <div className="relative">
-      {/* HERO */}
-      <section className="relative overflow-hidden">
-        <div className="mx-auto max-w-7xl px-6 pt-12 pb-8">
-          <h1 className="text-[18vw] md:text-[14rem] leading-[0.85] font-black italic tracking-tighter text-[#0055FF] select-none">
-            VOLUNTEERISM
+    <div className="relative w-full overflow-x-hidden">
+      {/* HERO SECTION */}
+      <section className="w-full pt-16 pb-8">
+        <div className="mx-auto max-w-7xl px-6">
+          {/* 
+              Fix: Used clamp to ensure the word never exceeds the container width.
+              'whitespace-nowrap' prevents the 'M' from ever dropping.
+          */}
+          <h1 className="text-[min(11vw,13rem)] leading-[0.8] font-black italic tracking-tighter text-[#0055FF] select-none text-left uppercase whitespace-nowrap">
+            Volunteerism
           </h1>
         </div>
       </section>
 
       {/* TWO BIG CARDS */}
-      <section className="mx-auto max-w-7xl px-6 grid md:grid-cols-2 gap-8 -mt-8">
+      <section className="mx-auto max-w-7xl px-6 grid md:grid-cols-2 gap-8">
         <div className="bg-white border-4 border-black rounded-[40px] p-10 brutal-shadow relative overflow-hidden">
           <Heart className="h-16 w-16 text-[#0055FF] mb-16" strokeWidth={2.5} />
           <h2 className="text-5xl md:text-6xl font-black italic leading-none mb-6">COMMUNITY<br />SUPPORT</h2>
-          <p className="text-neutral-600 text-lg max-w-md">
+          <p className="text-neutral-600 text-lg max-w-md font-bold">
             Direct action through the Bowery Mission, Habitat for Humanity, and NYC food banks. Real hours, real impact — logged automatically.
           </p>
         </div>
@@ -27,7 +31,7 @@ export default function Home() {
         <div className="bg-[#0055FF] border-4 border-black rounded-[40px] p-10 brutal-shadow text-white relative overflow-hidden">
           <Globe className="h-16 w-16 text-white/90 mb-16" strokeWidth={2.5} />
           <h2 className="text-5xl md:text-6xl font-black italic leading-none mb-6">SERVICE<br />LEARNING</h2>
-          <p className="text-white/90 text-lg max-w-md">
+          <p className="text-white/90 text-lg max-w-md font-bold">
             Experiential learning paths connecting your classroom theory to real-world Bronx, Brooklyn, and Queens communities.
           </p>
         </div>
@@ -49,8 +53,8 @@ export default function Home() {
               <Megaphone className="h-10 w-10 text-[#0055FF]" />
               <ArrowUpRight className="h-7 w-7 group-hover:rotate-12 transition-transform" />
             </div>
-            <h3 className="font-black italic text-2xl mb-2">{c.title}</h3>
-            <p className="text-neutral-600">{c.body}</p>
+            <h3 className="font-black italic text-2xl mb-2 uppercase">{c.title}</h3>
+            <p className="text-neutral-600 font-bold">{c.body}</p>
           </Link>
         ))}
       </section>
@@ -63,7 +67,7 @@ export default function Home() {
               READY TO<br />
               <span className="text-[#0055FF]">GET INVOLVED?</span>
             </h2>
-            <p className="text-white/70 mt-6 max-w-xl text-lg">
+            <p className="text-white/70 mt-6 max-w-xl text-lg font-bold">
               Join HIPE Civic — the CUNY-wide hub for service hours, civic pledges, and student advocacy.
             </p>
           </div>
@@ -76,6 +80,15 @@ export default function Home() {
           </Link>
         </div>
       </section>
+
+      <style jsx global>{`
+        .brutal-shadow {
+          box-shadow: 12px 12px 0px 0px rgba(0, 0, 0, 1);
+        }
+        .brutal-shadow-sm {
+          box-shadow: 6px 6px 0px 0px rgba(0, 0, 0, 1);
+        }
+      `}</style>
     </div>
   );
 }

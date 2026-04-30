@@ -1,12 +1,23 @@
 import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import { MongoDBAdapter } from "@auth/mongodb-adapter";
 import bcrypt from "bcryptjs";
+import clientPromise from "@/lib/mongodb";
 import { dbConnect } from "@/lib/db";
 import User from "@/models/User";
 
 export const authOptions: NextAuthOptions = {
-  session: { strategy: "jwt" },
-  pages: { signIn: "/login-registration" },
+  adapter: MongoDBAdapter(clientPromise),
+  
+  session: { 
+    strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 days
+  },
+  
+  pages: { 
+    signIn: "/login-registration", 
+  },
+  
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -15,21 +26,42 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) return null;
+        if (!credentials?.email || !credentials?.password) {
+          throw new Error("Please enter an email and password");
+        }
+        
         await dbConnect();
-        const user = await User.findOne({ email: credentials.email.toLowerCase() });
-        if (!user) return null;
-        const ok = await bcrypt.compare(credentials.password, user.password);
-        if (!ok) return null;
+        
+        // Use type assertion (User as any) if the model still shows red, 
+        // but the explicit typing in your models/User.ts is the best fix.
+        const user = await (User as any).findOne({ 
+          email: credentials.email.toLowerCase() 
+        });
+
+        if (!user) {
+          throw new Error("No user found with this email");
+        }
+        
+        const isPasswordCorrect = await bcrypt.compare(
+          credentials.password, 
+          user.password
+        );
+
+        if (!isPasswordCorrect) {
+          throw new Error("Incorrect password");
+        }
+
+        // Returning the object that will be passed to the JWT callback
         return {
           id: String(user._id),
           name: user.name,
           email: user.email,
-          role: user.role,
-        } as any;
+          role: user.role, 
+        };
       },
     }),
   ],
+  
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
@@ -46,5 +78,9 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
   },
+  
   secret: process.env.NEXTAUTH_SECRET,
+  
+  // Good for debugging errors during development
+  debug: process.env.NODE_ENV === "development",
 };
