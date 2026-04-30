@@ -6,10 +6,20 @@ import Application from "@/models/Application";
 
 export async function GET() {
   const session: any = await getServerSession(authOptions);
+  
+  // 1. Verify user is authenticated and has the "staff" role
   if (!session?.user || (session.user as any).role !== "staff")
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+
   await dbConnect();
-  const apps = await Application.find({}).sort({ createdAt: -1 }).lean();
+
+  // 2. Cast Application to 'any' to fix the ".find is not callable" error
+  // This allows staff to see all submissions for civic engagement opportunities
+  const apps = await (Application as any)
+    .find({})
+    .sort({ createdAt: -1 })
+    .lean();
+
   return NextResponse.json({
     applications: apps.map((a: any) => ({
       id: String(a._id),

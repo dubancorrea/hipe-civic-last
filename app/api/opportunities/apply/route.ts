@@ -9,25 +9,35 @@ import { SEED_OPPORTUNITIES } from "@/lib/opportunities";
 export async function POST(req: Request) {
   const session: any = await getServerSession(authOptions);
   if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
   const { opportunityId, motivation } = await req.json();
   if (!opportunityId)
     return NextResponse.json({ error: "opportunityId required" }, { status: 400 });
 
   await dbConnect();
 
-  // Find title from seed first, then DB
+  // 1. Find title from seed first, then DB
   let title = SEED_OPPORTUNITIES.find((s) => s.id === opportunityId)?.title;
+  
   if (!title) {
-    const opp = await Opportunity.findById(opportunityId).lean();
+    // Cast Opportunity to 'any' to fix the ".findById is not callable" error
+    const opp = await (Opportunity as any).findById(opportunityId).lean();
     if (opp) title = (opp as any).title;
   }
+  
   if (!title) return NextResponse.json({ error: "Opportunity not found" }, { status: 404 });
 
-  const existing = await Application.findOne({ userId: session.user.id, opportunityId });
+  // 2. Cast Application to 'any' to fix the ".findOne is not callable" error
+  const existing = await (Application as any).findOne({ 
+    userId: session.user.id, 
+    opportunityId 
+  });
+
   if (existing)
     return NextResponse.json({ error: "Already applied" }, { status: 409 });
 
-  const app = await Application.create({
+  // 3. Cast Application to 'any' to fix the ".create is not callable" error
+  const app = await (Application as any).create({
     userId: session.user.id,
     userEmail: session.user.email,
     userName: session.user.name,
@@ -35,5 +45,6 @@ export async function POST(req: Request) {
     opportunityTitle: title,
     motivation: motivation || "",
   });
+
   return NextResponse.json({ ok: true, applicationId: String(app._id) });
 }
