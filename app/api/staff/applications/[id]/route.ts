@@ -4,14 +4,14 @@ import { authOptions } from "@/lib/auth";
 import { dbConnect } from "@/lib/db";
 import Application from "@/models/Application";
 
-// Update: Ensure the first argument is 'NextRequest' and 'params' is a Promise
+// 1. Notice the 'NextRequest' type and the 'Promise' for params
 export async function PATCH(
   req: NextRequest, 
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session: any = await getServerSession(authOptions);
   
-  // Update: Await the params before using the 'id'
+  // 2. You MUST await params before destructuring 'id'
   const { id } = await params;
 
   if (!session?.user || (session.user as any).role !== "staff") {
@@ -27,7 +27,7 @@ export async function PATCH(
 
     await dbConnect();
 
-    // Use the awaited 'id' here
+    // 3. Use the awaited 'id' in your Mongoose query
     const updated = await (Application as any).findByIdAndUpdate(
       id, 
       { status }, 
