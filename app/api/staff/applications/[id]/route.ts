@@ -1,4 +1,4 @@
-// // fix: Next.js 16 params as Promise - forced redeploy
+// fix: Next.js 16 params as Promise - forced redeploy
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -10,7 +10,7 @@ import Application from "@/models/Application";
  * Next.js 16 requires 'params' to be treated as a Promise.
  */
 export async function PATCH(
-  req: NextRequest, 
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   // 1. Await the params to extract the ID (Required for Next.js 16)
@@ -18,14 +18,14 @@ export async function PATCH(
 
   // 2. Check authentication and staff role
   const session: any = await getServerSession(authOptions);
-  
+
   if (!session?.user || (session.user as any).role !== "staff") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   try {
     const { status } = await req.json();
-    
+
     // 3. Validate the status update
     const validStatuses = ["accepted", "declined", "completed", "pending"];
     if (!validStatuses.includes(status)) {
@@ -35,17 +35,16 @@ export async function PATCH(
     await dbConnect();
 
     // 4. Update the application in MongoDB
-    // Using 'any' casting to bypass Mongoose model initialization issues
     const updated = await (Application as any).findByIdAndUpdate(
-      id, 
-      { status }, 
+      id,
+      { status },
       { new: true }
     );
 
     if (!updated) {
       return NextResponse.json({ error: "Application not found" }, { status: 404 });
     }
-    
+
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error("Update error:", error);
