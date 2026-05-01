@@ -14,9 +14,7 @@ const nextConfig = {
 
   // 4. Addressing the Middleware-to-Proxy warning
   // Next.js 16 prefers defining routing and proxying here
-  experimental: {
-    proxy: true,
-  },
+
 
   // 5. API Headers & CORS
   async headers() {
