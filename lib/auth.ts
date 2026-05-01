@@ -32,8 +32,6 @@ export const authOptions: NextAuthOptions = {
         
         await dbConnect();
         
-        // Use type assertion (User as any) if the model still shows red, 
-        // but the explicit typing in your models/User.ts is the best fix.
         const user = await (User as any).findOne({ 
           email: credentials.email.toLowerCase() 
         });
@@ -51,7 +49,6 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Incorrect password");
         }
 
-        // Returning the object that will be passed to the JWT callback
         return {
           id: String(user._id),
           name: user.name,
@@ -77,10 +74,15 @@ export const authOptions: NextAuthOptions = {
       }
       return session;
     },
+    async redirect({ url, baseUrl }) {
+      // After login, redirect to dashboard
+      if (url.startsWith(baseUrl)) return url;
+      if (url.startsWith("/")) return `${baseUrl}${url}`;
+      return `${baseUrl}/dashboard`;
+    },
   },
   
   secret: process.env.NEXTAUTH_SECRET,
   
-  // Good for debugging errors during development
   debug: process.env.NODE_ENV === "development",
 };

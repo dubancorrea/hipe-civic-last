@@ -38,8 +38,11 @@ export default function LoginRegistrationPage() {
         redirect: false,
       });
       if (result?.error) throw new Error("Invalid credentials");
-      router.push("/dashboard");
+
+      // Wait for session cookie to be set before redirecting
+      await new Promise((resolve) => setTimeout(resolve, 500));
       router.refresh();
+      router.push("/dashboard");
     } catch (e: any) {
       setErr(e.message);
     } finally {
