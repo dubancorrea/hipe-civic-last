@@ -1,3 +1,4 @@
+// // fix: Next.js 16 params as Promise - forced redeploy
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
